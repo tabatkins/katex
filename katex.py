@@ -8,11 +8,11 @@ from __future__ import division, unicode_literals
 # We also expose the ParseError class to check if errors thrown from KaTeX are
 # errors in the expression, or errors in javascript handling.
 
-import ParseError import ParseError
-import Settings import Settings
-import buildTree import buildTree
-import parseTree import parseTree
-import utils
+from .ParseError import ParseError
+from .Settings import Settings
+from .buildTree import buildTree
+from .parseTree import parseTree
+from . import utils
 
 def render(expr, container, options):
     '''
