@@ -23,10 +23,13 @@ math = {}
 text = {}
 modes = {"math": math, "text": text}
 
-def replace(mode, value):
+def get(mode, value):
     if mode in modes and value in modes[mode]:
-        return modes[mode][value].replace
-    return value
+        return modes[mode][value]
+
+def replace(mode, value):
+    repl = get(mode, value)
+    return repl is repl is not None else value
 
 Symbol = namedtuple("Symbol", ["font", "group", "replace"])
 
