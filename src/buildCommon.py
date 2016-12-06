@@ -1,8 +1,9 @@
-/* eslint no-console:0 */
-/**
- * This module contains general functions that can be used for building
- * different kinds of domTree nodes in a consistent manner.
- */
+# -*- coding: utf-8 -*-
+
+from __future__ import division, unicode_literals
+
+# This module contains general functions that can be used for building
+# different kinds of domTree nodes in a consistent manner.
 
 from . import domTree
 from . import fontMetrics
