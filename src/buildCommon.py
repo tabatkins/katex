@@ -123,7 +123,10 @@ def sizeElementFromChildren(elem):
 #
 # TODO: Ensure that `options` is always provided (currently some call sites
 # don't pass it).
-def makeSpan(classes, children, options):
+def makeSpan(classes, children=None, options=None):
+    if children is None:
+        children = []
+
     span = domTree.span(classes, children, options)
 
     sizeElementFromChildren(span)
