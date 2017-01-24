@@ -726,133 +726,117 @@ def groupOp(group, options, prev):
         return base
 groupTypes['op'] = groupOp
 
-
-groupTypes.katex = function(group, options, prev) {
+def groupKatex(group, options, prev):
     # The KaTeX logo. The offsets for the K and a were chosen to look
     # good, but the offsets for the T, E, and X were taken from the
     # definition of \TeX in TeX (see TeXbook pg. 356)
-    var k = makeSpan(
-        ["k"], [buildCommon.mathsym("K", group.mode)], options)
-    var a = makeSpan(
-        ["a"], [buildCommon.mathsym("A", group.mode)], options)
+    k = makeSpan(["k"], [buildCommon.mathsym("K", group.mode)], options)
 
+    a = makeSpan(["a"], [buildCommon.mathsym("A", group.mode)], options)
     a.height = (a.height + 0.2) * 0.75
     a.depth = (a.height - 0.2) * 0.75
 
-    var t = makeSpan(
-        ["t"], [buildCommon.mathsym("T", group.mode)], options)
-    var e = makeSpan(
-        ["e"], [buildCommon.mathsym("E", group.mode)], options)
+    t = makeSpan(["t"], [buildCommon.mathsym("T", group.mode)], options)
 
+    e = makeSpan(["e"], [buildCommon.mathsym("E", group.mode)], options)
     e.height = (e.height - 0.2155)
     e.depth = (e.depth + 0.2155)
 
-    var x = makeSpan(
-        ["x"], [buildCommon.mathsym("X", group.mode)], options)
+    x = makeSpan(["x"], [buildCommon.mathsym("X", group.mode)], options)
 
-    return makeSpan(
-        ["mord", "katex-logo"], [k, a, t, e, x], options)
-}
+    return makeSpan(["mord", "katex-logo"], [k, a, t, e, x], options)
+groupTypes['katex'] = groupKatex
 
-groupTypes.overline = function(group, options, prev) {
+def groupOverline(group, options, prev):
     # Overlines are handled in the TeXbook pg 443, Rule 9.
-    var style = options.style
+    style = options.style
 
     # Build the inner group in the cramped style.
-    var innerGroup = buildGroup(group.value.body,
-            options.withStyle(style.cramp()))
+    innerGroup = buildGroup(group.value.body, options.withStyle(style.cramp()))
 
-    var ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-        style.sizeMultiplier
+    ruleWidth = fontMetrics.metrics.defaultRuleThickness / style.sizeMultiplier
 
     # Create the line above the body
-    var line = makeSpan(
-        [style.reset(), Style.TEXT.cls(), "overline-line"])
+    line = makeSpan([style.reset(), Style.TEXT.cls(), "overline-line"])
     line.height = ruleWidth
     line.maxFontSize = 1.0
 
     # Generate the vlist, with the appropriate kerns
-    var vlist = buildCommon.makeVList([
-        {type: "elem", elem: innerGroup},
-        {type: "kern", size: 3 * ruleWidth},
-        {type: "elem", elem: line},
-        {type: "kern", size: ruleWidth},
+    vlist = buildCommon.makeVList([
+        {"type": "elem", "elem": innerGroup},
+        {"type": "kern", "size": 3 * ruleWidth},
+        {"type": "elem", "elem": line},
+        {"type": "kern", "size": ruleWidth},
     ], "firstBaseline", 0, options)
 
     return makeSpan(["mord", "overline"], [vlist], options)
-}
+groupTypes['overline'] = groupOverline
 
-groupTypes.underline = function(group, options, prev) {
+def groupUnderline(group, options, prev):
     # Underlines are handled in the TeXbook pg 443, Rule 10.
-    var style = options.style
+    style = options.style
 
     # Build the inner group.
-    var innerGroup = buildGroup(group.value.body, options)
+    innerGroup = buildGroup(group.value.body, options)
 
-    var ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-        style.sizeMultiplier
+    ruleWidth = fontMetrics.metrics.defaultRuleThickness / style.sizeMultiplier
 
     # Create the line above the body
-    var line = makeSpan([style.reset(), Style.TEXT.cls(), "underline-line"])
+    line = makeSpan([style.reset(), Style.TEXT.cls(), "underline-line"])
     line.height = ruleWidth
     line.maxFontSize = 1.0
 
     # Generate the vlist, with the appropriate kerns
-    var vlist = buildCommon.makeVList([
-        {type: "kern", size: ruleWidth},
-        {type: "elem", elem: line},
-        {type: "kern", size: 3 * ruleWidth},
-        {type: "elem", elem: innerGroup},
+    vlist = buildCommon.makeVList([
+        {"type": "kern", "size": ruleWidth},
+        {"type": "elem", "elem": line},
+        {"type": "kern", "size": 3 * ruleWidth},
+        {"type": "elem", "elem": innerGroup},
     ], "top", innerGroup.height, options)
 
     return makeSpan(["mord", "underline"], [vlist], options)
-}
+groupTypes['underline'] = groupUnderline
 
-groupTypes.sqrt = function(group, options, prev) {
+def groupSqrt(group, options, prev):
     # Square roots are handled in the TeXbook pg. 443, Rule 11.
-    var style = options.style
+    style = options.style
 
     # First, we do the same steps as in overline to build the inner group
     # and line
-    var inner = buildGroup(group.value.body, options.withStyle(style.cramp()))
+    inner = buildGroup(group.value.body, options.withStyle(style.cramp()))
 
-    var ruleWidth = fontMetrics.metrics.defaultRuleThickness /
-        style.sizeMultiplier
+    ruleWidth = fontMetrics.metrics.defaultRuleThickness / style.sizeMultiplier
 
-    var line = makeSpan(
-        [style.reset(), Style.TEXT.cls(), "sqrt-line"], [],
-        options)
+    line = makeSpan([style.reset(), Style.TEXT.cls(), "sqrt-line"], [], options)
     line.height = ruleWidth
     line.maxFontSize = 1.0
 
-    var phi = ruleWidth
+    phi = ruleWidth
     if (style.id < Style.TEXT.id) {
         phi = style.metrics.xHeight
     }
 
     # Calculate the clearance between the body and line
-    var lineClearance = ruleWidth + phi / 4
+    lineClearance = ruleWidth + phi / 4
 
-    var innerHeight = (inner.height + inner.depth) * style.sizeMultiplier
-    var minDelimiterHeight = innerHeight + lineClearance + ruleWidth
+    innerHeight = (inner.height + inner.depth) * style.sizeMultiplier
+    minDelimiterHeight = innerHeight + lineClearance + ruleWidth
 
     # Create a \surd delimiter of the required minimum size
-    var delim = makeSpan(["sqrt-sign"], [
+    delim = makeSpan(["sqrt-sign"], [
         delimiter.customSizedDelim("\\surd", minDelimiterHeight,
                                    false, options, group.mode)],
-                         options)
+                     options)
 
-    var delimDepth = (delim.height + delim.depth) - ruleWidth
+    delimDepth = (delim.height + delim.depth) - ruleWidth
 
     # Adjust the clearance based on the delimiter size
-    if (delimDepth > inner.height + inner.depth + lineClearance) {
-        lineClearance =
-            (lineClearance + delimDepth - inner.height - inner.depth) / 2
-    }
+    if delimDepth > inner.height + inner.depth + lineClearance:
+        lineClearance = (lineClearance + delimDepth - inner.height - inner.depth) / 2
 
     # Shift the delimiter so that its top lines up with the top of the line
-    var delimShift = -(inner.height + lineClearance + ruleWidth) + delim.height
-    delim.style.top = delimShift + "em"
+    delimShift = -(inner.height + lineClearance + ruleWidth) + delim.height
+    delim.style.top = em(delimShift)
     delim.height -= delimShift
     delim.depth += delimShift
 
@@ -861,129 +845,115 @@ groupTypes.sqrt = function(group, options, prev) {
     # should omit the body entirely. (note this doesn't work for something
     # like `\sqrt{\rlap{x}}`, but if someone is doing that they deserve for
     # it not to work.
-    var body
-    if (inner.height === 0 && inner.depth === 0) {
+    if inner.height == 0 and inner.depth == 0:
         body = makeSpan()
-    } else {
+    else:
         body = buildCommon.makeVList([
-            {type: "elem", elem: inner},
-            {type: "kern", size: lineClearance},
-            {type: "elem", elem: line},
-            {type: "kern", size: ruleWidth},
+            {"type": "elem", "elem": inner},
+            {"type": "kern", "size": lineClearance},
+            {"type": "elem", "elem": line},
+            {"type": "kern", "size": ruleWidth},
         ], "firstBaseline", 0, options)
-    }
 
-    if (!group.value.index) {
+    if not group.value.index:
         return makeSpan(["mord", "sqrt"], [delim, body], options)
-    } else {
+    else:
         # Handle the optional root index
 
         # The index is always in scriptscript style
-        var newOptions = options.withStyle(Style.SCRIPTSCRIPT)
-        var root = buildGroup(group.value.index, newOptions)
-        var rootWrap = makeSpan(
-            [style.reset(), Style.SCRIPTSCRIPT.cls()],
-            [root],
-            newOptions)
+        newOptions = options.withStyle(Style.SCRIPTSCRIPT)
+        root = buildGroup(group.value.index, newOptions)
+        rootWrap = makeSpan([style.reset(), Style.SCRIPTSCRIPT.cls()], [root], newOptions)
 
         # Figure out the height and depth of the inner part
-        var innerRootHeight = Math.max(delim.height, body.height)
-        var innerRootDepth = Math.max(delim.depth, body.depth)
+        innerRootHeight = max(delim.height, body.height)
+        innerRootDepth = max(delim.depth, body.depth)
 
         # The amount the index is shifted by. This is taken from the TeX
         # source, in the definition of `\r@@t`.
-        var toShift = 0.6 * (innerRootHeight - innerRootDepth)
+        toShift = 0.6 * (innerRootHeight - innerRootDepth)
 
         # Build a VList with the superscript shifted up correctly
-        var rootVList = buildCommon.makeVList(
-            [{type: "elem", elem: rootWrap}],
+        rootVList = buildCommon.makeVList(
+            [{"type": "elem", "elem": rootWrap}],
             "shift", -toShift, options)
         # Add a class surrounding it so we can add on the appropriate
         # kerning
-        var rootVListWrap = makeSpan(["root"], [rootVList])
+        rootVListWrap = makeSpan(["root"], [rootVList])
 
-        return makeSpan(["mord", "sqrt"],
-            [rootVListWrap, delim, body], options)
-    }
-}
+        return makeSpan(["mord", "sqrt"], [rootVListWrap, delim, body], options)
+groupTypes['sqrt'] = groupSqrt
 
-groupTypes.sizing = function(group, options, prev) {
+def groupSizing(group, options, prev):
     # Handle sizing operators like \Huge. Real TeX doesn't actually allow
     # these functions inside of math expressions, so we do some special
     # handling.
-    var inner = buildExpression(group.value.value,
-            options.withSize(group.value.size), prev)
+    inner = buildExpression(group.value.value, options.withSize(group.value.size), prev)
 
     # Compute the correct maxFontSize.
-    var style = options.style
-    var fontSize = buildCommon.sizingMultiplier[group.value.size]
+    style = options.style
+    fontSize = buildCommon.sizingMultiplier[group.value.size]
     fontSize = fontSize * style.sizeMultiplier
 
     # Add size-resetting classes to the inner list and set maxFontSize
     # manually. Handle nested size changes.
-    for (var i = 0 i < inner.length i++) {
-        var pos = utils.indexOf(inner[i].classes, "sizing")
-        if (pos < 0) {
-            inner[i].classes.push("sizing", "reset-" + options.size,
-                                  group.value.size, style.cls())
-            inner[i].maxFontSize = fontSize
-        } else if (inner[i].classes[pos + 1] === "reset-" + group.value.size) {
-            # This is a nested size change: e.g., inner[i] is the "b" in
-            # `\Huge a \small b`. Override the old size (the `reset-` class)
-            # but not the new size.
-            inner[i].classes[pos + 1] = "reset-" + options.size
-        }
-    }
+    for innerEl in inner:
+        if "sizing" not in innerEl.classes:
+            innerEl.classes.extend(["sizing", "reset-" + options.size, group.value.size, style.cls()])
+            innerEl.maxFontSize = fontSize
+        else:
+            pos = innerEl.classes.index("sizing")
+            if innerEl.classes[pos + 1] == "reset-" + group.value.size) {
+                # This is a nested size change: e.g., inner[i] is the "b" in
+                # `\Huge a \small b`. Override the old size (the `reset-` class)
+                # but not the new size.
+                innerEl.classes[pos + 1] = "reset-" + options.size
 
     return buildCommon.makeFragment(inner)
-}
+groupTypes['sizing'] = groupSizing
 
-groupTypes.styling = function(group, options, prev) {
+def groupStyling(group, options, prev):
     # Style changes are handled in the TeXbook on pg. 442, Rule 3.
 
     # Figure out what style we're changing to.
-    var styleMap = {
+    styleMap = {
         "display": Style.DISPLAY,
         "text": Style.TEXT,
         "script": Style.SCRIPT,
         "scriptscript": Style.SCRIPTSCRIPT,
     }
 
-    var newStyle = styleMap[group.value.style]
-    var newOptions = options.withStyle(newStyle)
+    newStyle = styleMap[group.value.style]
+    newOptions = options.withStyle(newStyle)
 
     # Build the inner expression in the new style.
-    var inner = buildExpression(
-        group.value.value, newOptions, prev)
+    inner = buildExpression(group.value.value, newOptions, prev)
 
     # Add style-resetting classes to the inner list. Handle nested changes.
-    for (var i = 0 i < inner.length i++) {
-        var pos = utils.indexOf(inner[i].classes, newStyle.reset())
-        if (pos < 0) {
-            inner[i].classes.push(options.style.reset(), newStyle.cls())
-        } else {
+    for innerEl in inner:
+        if newStyle.reset() not in innerEl.classes:
+            innerEl.classes.extend([options.style.reset(), newStyle.cls()])
+        else:
+            pos = innerEl.classes.index(newStyle.reset())
             # This is a nested style change, as `\textstyle a\scriptstyle b`.
             # Only override the old style (the reset class).
-            inner[i].classes[pos] = options.style.reset()
-        }
-    }
+            innerEl.classes[pos] = options.style.reset()
 
     return new buildCommon.makeFragment(inner)
-}
+groupTypes['styling'] = groupStyling
 
-groupTypes.font = function(group, options, prev) {
-    var font = group.value.font
+def groupFont(group, options, prev):
+    font = group.value.font
     return buildGroup(group.value.body, options.withFont(font), prev)
-}
+groupTypes['font'] = groupFont
 
-groupTypes.delimsizing = function(group, options, prev) {
-    var delim = group.value.value
+def groupDelimSizing(group, options, prev):
+    delim = group.value.value
 
-    if (delim === ".") {
+    if delim == ".":
         # Empty delimiters still count as elements, even though they don't
         # show anything.
         return makeSpan([groupToType[group.value.delimType]])
-    }
 
     # Use delimiter.sizedDelim to generate the delimiter.
     return makeSpan(
@@ -991,22 +961,21 @@ groupTypes.delimsizing = function(group, options, prev) {
         [delimiter.sizedDelim(
             delim, group.value.size, options, group.mode)],
         options)
-}
+groupTypes['delimsizing'] = groupDelimSizing
 
-groupTypes.leftright = function(group, options, prev) {
+def groupLeftRight(group, options, prev):
     # Build the inner expression
-    var inner = buildExpression(group.value.body, options.reset())
+    inner = buildExpression(group.value.body, options.reset())
 
-    var innerHeight = 0
-    var innerDepth = 0
+    innerHeight = 0
+    innerDepth = 0
 
     # Calculate its height and depth
-    for (var i = 0 i < inner.length i++) {
-        innerHeight = Math.max(inner[i].height, innerHeight)
-        innerDepth = Math.max(inner[i].depth, innerDepth)
-    }
+    for el in inner:
+        innerHeight = max(el.height, innerHeight)
+        innerDepth = max(el.depth, innerDepth)
 
-    var style = options.style
+    style = options.style
 
     # The size of delimiters is the same, regardless of what style we are
     # in. Thus, to correctly calculate the size of delimiter we need around
@@ -1014,59 +983,50 @@ groupTypes.leftright = function(group, options, prev) {
     innerHeight *= style.sizeMultiplier
     innerDepth *= style.sizeMultiplier
 
-    var leftDelim
-    if (group.value.left === ".") {
+    if group.value.left == ".":
         # Empty delimiters in \left and \right make null delimiter spaces.
         leftDelim = makeNullDelimiter(options)
-    } else {
+    else:
         # Otherwise, use leftRightDelim to generate the correct sized
         # delimiter.
         leftDelim = delimiter.leftRightDelim(
             group.value.left, innerHeight, innerDepth, options,
             group.mode)
-    }
     # Add it to the beginning of the expression
     inner.unshift(leftDelim)
 
-    var rightDelim
     # Same for the right delimiter
-    if (group.value.right === ".") {
+    if group.value.right == ".":
         rightDelim = makeNullDelimiter(options)
-    } else {
+    else:
         rightDelim = delimiter.leftRightDelim(
             group.value.right, innerHeight, innerDepth, options,
             group.mode)
-    }
     # Add it to the end of the expression.
     inner.push(rightDelim)
 
-    return makeSpan(
-        ["minner", style.cls()], inner, options)
-}
+    return makeSpan(["minner", style.cls()], inner, options)
+groupTypes['leftright'] = groupLeftRight
 
-groupTypes.rule = function(group, options, prev) {
+def groupRule(group, options, prev):
     # Make an empty span for the rule
-    var rule = makeSpan(["mord", "rule"], [], options)
-    var style = options.style
+    rule = makeSpan(["mord", "rule"], [], options)
+    style = options.style
 
     # Calculate the shift, width, and height of the rule, and account for units
-    var shift = 0
-    if (group.value.shift) {
+    shift = 0
+    if group.value.shift:
         shift = group.value.shift.number
-        if (group.value.shift.unit === "ex") {
+        if group.value.shift.unit == "ex":
             shift *= style.metrics.xHeight
-        }
-    }
 
-    var width = group.value.width.number
-    if (group.value.width.unit === "ex") {
+    width = group.value.width.number
+    if group.value.width.unit == "ex":
         width *= style.metrics.xHeight
-    }
 
-    var height = group.value.height.number
-    if (group.value.height.unit === "ex") {
+    height = group.value.height.number
+    if group.value.height.unit == "ex":
         height *= style.metrics.xHeight
-    }
 
     # The sizes of rules are absolute, so make it larger if we are in a
     # smaller style.
@@ -1075,9 +1035,9 @@ groupTypes.rule = function(group, options, prev) {
     height /= style.sizeMultiplier
 
     # Style the rule to the right size
-    rule.style.borderRightWidth = width + "em"
-    rule.style.borderTopWidth = height + "em"
-    rule.style.bottom = shift + "em"
+    rule.style.borderRightWidth = em(width)
+    rule.style.borderTopWidth = em(height)
+    rule.style.bottom = em(shift)
 
     # Record the height and width
     rule.width = width
@@ -1085,35 +1045,32 @@ groupTypes.rule = function(group, options, prev) {
     rule.depth = -shift
 
     return rule
-}
+groupTypes['rule'] = groupRule
 
-groupTypes.kern = function(group, options, prev) {
+def groupKern(group, options, prev):
     # Make an empty span for the rule
-    var rule = makeSpan(["mord", "rule"], [], options)
-    var style = options.style
+    rule = makeSpan(["mord", "rule"], [], options)
+    style = options.style
 
-    var dimension = 0
-    if (group.value.dimension) {
+    dimension = 0
+    if group.value.dimension:
         dimension = group.value.dimension.number
-        if (group.value.dimension.unit === "ex") {
+        if group.value.dimension.unit == "ex":
             dimension *= style.metrics.xHeight
-        }
-    }
 
     dimension /= style.sizeMultiplier
 
-    rule.style.marginLeft = dimension + "em"
+    rule.style.marginLeft = em(dimension)
 
     return rule
-}
+groupTypes['kern'] = groupKern
 
-groupTypes.accent = function(group, options, prev) {
+def groupAccent(group, options, prev):
     # Accents are handled in the TeXbook pg. 443, rule 12.
-    var base = group.value.base
-    var style = options.style
+    base = group.value.base
+    style = options.style
 
-    var supsubGroup
-    if (group.type === "supsub") {
+    if group.type == "supsub":
         # If our base is a character box, and we have superscripts and
         # subscripts, the supsub will defer to us. In particular, we want
         # to attach the superscripts and subscripts to the inner body (so
@@ -1123,7 +1080,7 @@ groupTypes.accent = function(group, options, prev) {
         # rendering that, while keeping track of where the accent is.
 
         # The supsub group is the group that was passed in
-        var supsub = group
+        supsub = group
         # The real accent group is the base of the supsub group
         group = supsub.value.base
         # The character box is the base of the accent group
@@ -1133,45 +1090,36 @@ groupTypes.accent = function(group, options, prev) {
 
         # Rerender the supsub group with its new base, and store that
         # result.
-        supsubGroup = buildGroup(
-            supsub, options.reset(), prev)
-    }
+        supsubGroup = buildGroup(supsub, options.reset(), prev)
 
     # Build the base group
-    var body = buildGroup(
-        base, options.withStyle(style.cramp()))
+    var body = buildGroup(base, options.withStyle(style.cramp()))
 
     # Calculate the skew of the accent. This is based on the line "If the
     # nucleus is not a single character, let s = 0 otherwise set s to the
     # kern amount for the nucleus followed by the \skewchar of its font."
     # Note that our skew metrics are just the kern between each character
     # and the skewchar.
-    var skew
-    if (isCharacterBox(base)) {
+    if isCharacterBox(base):
         # If the base is a character box, then we want the skew of the
         # innermost character. To do that, we find the innermost character:
-        var baseChar = getBaseElem(base)
+        baseChar = getBaseElem(base)
         # Then, we render its group to get the symbol inside it
-        var baseGroup = buildGroup(
-            baseChar, options.withStyle(style.cramp()))
+        baseGroup = buildGroup(baseChar, options.withStyle(style.cramp()))
         # Finally, we pull the skew off of the symbol.
         skew = baseGroup.skew
         # Note that we now throw away baseGroup, because the layers we
         # removed with getBaseElem might contain things like \color which
         # we can't get rid of.
         # TODO(emily): Find a better way to get the skew
-    } else {
+    else:
         skew = 0
-    }
 
     # calculate the amount of space between the body and the accent
-    var clearance = Math.min(
-        body.height,
-        style.metrics.xHeight)
+    clearance = min(body.height, style.metrics.xHeight)
 
     # Build the accent
-    var accent = buildCommon.makeSymbol(
-        group.value.accent, "Main-Regular", "math", options)
+    accent = buildCommon.makeSymbol(group.value.accent, "Main-Regular", "math", options)
     # Remove the italic correction of the accent, because it only serves to
     # shift the accent over to a place we don't want.
     accent.italic = 0
@@ -1180,44 +1128,42 @@ groupTypes.accent = function(group, options, prev) {
     # thus shows up much too far to the left. To account for this, we add a
     # specific class which shifts the accent over to where we want it.
     # TODO(emily): Fix this in a better way, like by changing the font
-    var vecClass = group.value.accent === "\\vec" ? "accent-vec" : null
+    vecClass = "accent-vec" if group.value.accent == "\\vec" else None
 
-    var accentBody = makeSpan(["accent-body", vecClass], [
-        makeSpan([], [accent])])
+    accentBody = makeSpan(["accent-body", vecClass], [makeSpan([], [accent])])
 
     accentBody = buildCommon.makeVList([
-        {type: "elem", elem: body},
-        {type: "kern", size: -clearance},
-        {type: "elem", elem: accentBody},
+        {"type": "elem", "elem": body},
+        {"type": "kern", "size": -clearance},
+        {"type": "elem", "elem": accentBody},
     ], "firstBaseline", 0, options)
 
     # Shift the accent over by the skew. Note we shift by twice the skew
     # because we are centering the accent, so by adding 2*skew to the left,
     # we shift it to the right by 1*skew.
-    accentBody.children[1].style.marginLeft = 2 * skew + "em"
+    accentBody.children[1].style.marginLeft = em(2 * skew)
 
-    var accentWrap = makeSpan(["mord", "accent"], [accentBody], options)
+    accentWrap = makeSpan(["mord", "accent"], [accentBody], options)
 
-    if (supsubGroup) {
+    if supsubGroup:
         # Here, we replace the "base" child of the supsub with our newly
         # generated accent.
         supsubGroup.children[0] = accentWrap
 
         # Since we don't rerun the height calculation after replacing the
         # accent, we manually recalculate height.
-        supsubGroup.height = Math.max(accentWrap.height, supsubGroup.height)
+        supsubGroup.height = max(accentWrap.height, supsubGroup.height)
 
         # Accents should always be ords, even when their innards are not.
         supsubGroup.classes[0] = "mord"
 
         return supsubGroup
-    } else {
+    else:
         return accentWrap
-    }
-}
+groupTypes['accent'] = groupAccent
 
-groupTypes.phantom = function(group, options, prev) {
-    var elements = buildExpression(
+def groupPhantom(group, options, prev):
+    elements = buildExpression(
         group.value.value,
         options.withPhantom(),
         prev
@@ -1226,80 +1172,69 @@ groupTypes.phantom = function(group, options, prev) {
     # \phantom isn't supposed to affect the elements it contains.
     # See "color" for more details.
     return new buildCommon.makeFragment(elements)
-}
+groupTypes['phantom'] = groupPhantom
 
-/**
- * buildGroup is the function that takes a group and calls the correct groupType
- * function for it. It also handles the interaction of size and style changes
- * between parents and children.
- */
-var buildGroup = function(group, options, prev) {
-    if (!group) {
+# buildGroup is the function that takes a group and calls the correct groupType
+# function for it. It also handles the interaction of size and style changes
+# between parents and children.
+def buildGroup(group, options, prev):
+    if not group:
         return makeSpan()
-    }
 
-    if (groupTypes[group.type]) {
+    if group.type in groupTypes:
         # Call the groupTypes function
-        var groupNode = groupTypes[group.type](group, options, prev)
-        var multiplier
+        groupNode = groupTypes[group.type](group, options, prev)
 
         # If the style changed between the parent and the current group,
         # account for the size difference
-        if (options.style !== options.parentStyle) {
-            multiplier = options.style.sizeMultiplier /
-                    options.parentStyle.sizeMultiplier
+        if options.style != options.parentStyle:
+            multiplier = options.style.sizeMultiplier / options.parentStyle.sizeMultiplier
 
             groupNode.height *= multiplier
             groupNode.depth *= multiplier
-        }
 
         # If the size changed between the parent and the current group, account
         # for that size difference.
-        if (options.size !== options.parentSize) {
-            multiplier = buildCommon.sizingMultiplier[options.size] /
-                    buildCommon.sizingMultiplier[options.parentSize]
+        if options.size != options.parentSize:
+            multiplier = buildCommon.sizingMultiplier[options.size] / buildCommon.sizingMultiplier[options.parentSize]
 
             groupNode.height *= multiplier
             groupNode.depth *= multiplier
-        }
 
         return groupNode
-    } else {
-        throw new ParseError(
-            "Got group of unknown type: '" + group.type + "'")
-    }
-}
+    else:
+        die("Got group of unknown type: '" + group.type + "'")
 
-/**
- * Take an entire parse tree, and build it into an appropriate set of HTML
- * nodes.
- */
-var buildHTML = function(tree, options) {
+
+# Take an entire parse tree, and build it into an appropriate set of HTML
+# nodes.
+def buildHTML(tree, options):
     # buildExpression is destructive, so we need to make a clone
     # of the incoming tree so that it isn't accidentally changed
-    tree = JSON.parse(JSON.stringify(tree))
+    import copy
+    tree = copy.deepcopy(tree)
 
     # Build the expression contained in the tree
-    var expression = buildExpression(tree, options)
-    var body = makeSpan(["base", options.style.cls()], expression, options)
+    expression = buildExpression(tree, options)
+    body = makeSpan(["base", options.style.cls()], expression, options)
 
     # Add struts, which ensure that the top of the HTML element falls at the
     # height of the expression, and the bottom of the HTML element falls at the
     # depth of the expression.
-    var topStrut = makeSpan(["strut"])
-    var bottomStrut = makeSpan(["strut", "bottom"])
+    topStrut = makeSpan(["strut"])
+    bottomStrut = makeSpan(["strut", "bottom"])
 
-    topStrut.style.height = body.height + "em"
-    bottomStrut.style.height = (body.height + body.depth) + "em"
+    topStrut.style.height = em(body.height)
+    bottomStrut.style.height = em(body.height + body.depth)
+
     # We'd like to use `vertical-align: top` but in IE 9 this lowers the
     # baseline of the box to the bottom of this strut (instead staying in the
     # normal place) so we use an absolute value for vertical-align instead
-    bottomStrut.style.verticalAlign = -body.depth + "em"
+    bottomStrut.style.verticalAlign = em(-body.depth)
 
     # Wrap the struts and body together
-    var htmlNode = makeSpan(["katex-html"], [topStrut, bottomStrut, body])
+    htmlNode = makeSpan(["katex-html"], [topStrut, bottomStrut, body])
 
     htmlNode.setAttribute("aria-hidden", "true")
 
     return htmlNode
-}
