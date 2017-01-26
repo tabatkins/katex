@@ -245,7 +245,7 @@ def text(group, options, prev=None):
 groupTypes['text'] = text
 
 def color(group, options, prev=None):
-    element = buildExpression(group.value.value, options.withColor(group.value.color), prev)
+    element = buildExpression(group.value.value, options.extend(color=group.value.color), prev)
     # \color isn't supposed to affect the type of the elements it contains.
     # To accomplish this, we wrap the results in a fragment, so the inner
     # elements will be able to directly interact with their neighbors. For
@@ -270,12 +270,12 @@ def supsub(group, options, prev=None):
     submind = None
 
     if group.value.sup:
-        newOptions = options.withStyle(style.sup())
+        newOptions = options.extend(style=style.sup())
         sup = buildGroup(group.value.sup, newOptions)
         supmid = makeSpan([style.reset(), style.sup().cls()], [sup], newOptions)
 
     if group.value.sub:
-        newOptions = options.withStyle(style.sub())
+        newOptions = options.extend(style=style.sub())
         sub = buildGroup(group.value.sub, newOptions)
         submid = makeSpan([style.reset(), style.sub().cls()], [sub], newOptions)
 
@@ -357,11 +357,11 @@ def genfrac(group, options, prev):
     nstyle = style.fracNum()
     dstyle = style.fracDen()
 
-    newOptions = options.withStyle(nstyle)
+    newOptions = options.extend(style=nstyle)
     numer = buildGroup(group.value.numer, newOptions)
     numerreset = makeSpan([style.reset(), nstyle.cls()], [numer], newOptions)
 
-    newOptions = options.withStyle(dstyle)
+    newOptions = options.extend(style=dstyle)
     denom = buildGroup(group.value.denom, newOptions)
     denomreset = makeSpan([style.reset(), dstyle.cls()], [denom], newOptions)
 
@@ -433,11 +433,11 @@ def genfrac(group, options, prev):
     if group.value.leftDelim is None:
         leftDelim = makeNullDelimiter(options)
     else:
-        leftDelim = delimiter.customSizedDelim(group.value.leftDelim, delimSize, True, options.withStyle(style), group.mode)
+        leftDelim = delimiter.customSizedDelim(group.value.leftDelim, delimSize, True, options.extend(style=style), group.mode)
     if group.value.rightDelim is None:
         rightDelim = makeNullDelimiter(options)
     else:
-        rightDelim = delimiter.customSizedDelim(group.value.rightDelim, delimSize, True, options.withStyle(style), group.mode)
+        rightDelim = delimiter.customSizedDelim(group.value.rightDelim, delimSize, True, options.extend(style=style), group.mode)
 
     return makeSpan(
         ["mord", options.style.reset(), style.cls()],
@@ -654,13 +654,13 @@ def op(group, options, prev):
         # We manually have to handle the superscripts and subscripts. This,
         # aside from the kern calculations, is copied from supsub.
         if supGroup:
-            newOptions = options.withStyle(style.sup())
+            newOptions = options.extend(style=style.sup())
             sup = buildGroup(supGroup, newOptions)
             supmid = makeSpan([style.reset(), style.sup().cls()], [sup], newOptions)
             supKern = max(fontMetrics.metrics.bigOpSpacing1, fontMetrics.metrics.bigOpSpacing3 - sup.depth)
 
         if subGroup:
-            newOptions = options.withStyle(style.sub())
+            newOptions = options.extend(style=style.sub())
             sub = buildGroup(subGroup, newOptions)
             submid = makeSpan([style.reset(), style.sub().cls()], [sub], newOptions)
             subKern = max(fontMetrics.metrics.bigOpSpacing2, fontMetrics.metrics.bigOpSpacing4 - sub.height)
@@ -752,7 +752,7 @@ def overline(group, options, prev):
     style = options.style
 
     # Build the inner group in the cramped style.
-    innerGroup = buildGroup(group.value.body, options.withStyle(style.cramp()))
+    innerGroup = buildGroup(group.value.body, options.extend(style=style.cramp()))
 
     ruleWidth = fontMetrics.metrics.defaultRuleThickness / style.sizeMultiplier
 
@@ -803,7 +803,7 @@ def sqrt(group, options, prev):
 
     # First, we do the same steps as in overline to build the inner group
     # and line
-    inner = buildGroup(group.value.body, options.withStyle(style.cramp()))
+    inner = buildGroup(group.value.body, options.extend(style=style.cramp()))
 
     ruleWidth = fontMetrics.metrics.defaultRuleThickness / style.sizeMultiplier
 
@@ -861,7 +861,7 @@ def sqrt(group, options, prev):
         # Handle the optional root index
 
         # The index is always in scriptscript style
-        newOptions = options.withStyle(Style.SCRIPTSCRIPT)
+        newOptions = options.extend(style=Style.SCRIPTSCRIPT)
         root = buildGroup(group.value.index, newOptions)
         rootWrap = makeSpan([style.reset(), Style.SCRIPTSCRIPT.cls()], [root], newOptions)
 
@@ -888,7 +888,7 @@ def sizing(group, options, prev):
     # Handle sizing operators like \Huge. Real TeX doesn't actually allow
     # these functions inside of math expressions, so we do some special
     # handling.
-    inner = buildExpression(group.value.value, options.withSize(group.value.size), prev)
+    inner = buildExpression(group.value.value, options.extend(size=group.value.size), prev)
 
     # Compute the correct maxFontSize.
     style = options.style
@@ -924,7 +924,7 @@ def styling(group, options, prev):
     }
 
     newStyle = styleMap[group.value.style]
-    newOptions = options.withStyle(newStyle)
+    newOptions = options.extend(style=newStyle)
 
     # Build the inner expression in the new style.
     inner = buildExpression(group.value.value, newOptions, prev)
@@ -944,7 +944,7 @@ groupTypes['styling'] = styling
 
 def font(group, options, prev):
     font = group.value.font
-    return buildGroup(group.value.body, options.withFont(font), prev)
+    return buildGroup(group.value.body, options.extend(font=font), prev)
 groupTypes['font'] = font
 
 def delimsizing(group, options, prev):
@@ -1093,7 +1093,7 @@ def accent(group, options, prev):
         supsubGroup = buildGroup(supsub, options.reset(), prev)
 
     # Build the base group
-    var body = buildGroup(base, options.withStyle(style.cramp()))
+    var body = buildGroup(base, options.extend(style=style.cramp()))
 
     # Calculate the skew of the accent. This is based on the line "If the
     # nucleus is not a single character, let s = 0 otherwise set s to the
@@ -1105,7 +1105,7 @@ def accent(group, options, prev):
         # innermost character. To do that, we find the innermost character:
         baseChar = getBaseElem(base)
         # Then, we render its group to get the symbol inside it
-        baseGroup = buildGroup(baseChar, options.withStyle(style.cramp()))
+        baseGroup = buildGroup(baseChar, options.extend(style=style.cramp()))
         # Finally, we pull the skew off of the symbol.
         skew = baseGroup.skew
         # Note that we now throw away baseGroup, because the layers we
@@ -1165,7 +1165,7 @@ groupTypes['accent'] = accent
 def phantom(group, options, prev):
     elements = buildExpression(
         group.value.value,
-        options.withPhantom(),
+        options.extend(phantom=True),
         prev
     )
 
