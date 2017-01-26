@@ -19,10 +19,7 @@ def buildTree(tree, expression, settings=None):
         startStyle = Style.DISPLAY
 
     # Setup the default options
-    options = Options({
-        style: startStyle,
-        size: "size5",
-    })
+    options = Options(style=startStyle, size="size5")
 
     # `buildHTML` sometimes messes with the parse tree (like turning bins ->
     # ords), so we build the MathML version first.
