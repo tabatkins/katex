@@ -600,8 +600,8 @@ class Parser(object):
                 skip -= 1
                 continue
             v = node.value
-            if v == "-" and i+1 < maxIndex and group[i+1].value == "-":
-                if i+2 < maxIndex and group[i+2].value == "-":
+            if v == "-" and i+1 <= maxIndex and group[i+1].value == "-":
+                if i+2 <= maxIndex and group[i+2].value == "-":
                     newNodes.append(ParseNode("textord", "---", "text", node, group[i+2]))
                     skip = 2
                     continue
@@ -609,7 +609,7 @@ class Parser(object):
                     newNodes.append(ParseNode("textord", "--", "text", node, group[i+1]))
                     skip = 1
                     continue
-            if v in "'`" and i+1 < maxIndex and group[i+1].value == v:
+            if v in "'`" and i+1 <= maxIndex and group[i+1].value == v:
                 newNodes.append(ParseNode("textord", v*2, "text", node, group[i+1]))
                 skip = 1
                 continue
